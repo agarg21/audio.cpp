@@ -57,7 +57,7 @@ jobs:
           max-size: 500M
           # Only push builds (main/dev/release) write the cache; PR runs restore it read-only,
           # so one PR's cache never evicts another's and every new PR starts warm.
-          save: ${{ github.event_name == 'push' || github.ref_name == 'measure-harness' }}  # fork-only: harness dispatch seeds the cache like a push to main
+          save: ${{ github.event_name == 'push' }}
 
       - name: Configure
         run: |
