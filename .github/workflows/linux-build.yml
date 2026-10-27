@@ -26,8 +26,6 @@ jobs:
             cxx: clang++-18
 
     env:
-      CCACHE_COMPILERCHECK: content
-      CCACHE_BASEDIR: ${{ github.workspace }}
       CC: ${{ matrix.cc }}
       CXX: ${{ matrix.cxx }}
       BUILD_DIR: build/ci-linux-${{ matrix.backend }}
@@ -50,20 +48,9 @@ jobs:
         if: matrix.backend == 'cpu-clang'
         run: sudo apt-get install -y clang-18 libomp-18-dev
 
-      - name: Set up ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: linux-${{ matrix.backend }}
-          max-size: 500M
-          # Only push builds (main/dev/release) write the cache; PR runs restore it read-only,
-          # so one PR's cache never evicts another's and every new PR starts warm.
-          save: ${{ github.event_name == 'push' || github.ref_name == 'measure-harness' }}  # fork-only: harness dispatch seeds the cache like a push to main
-
       - name: Configure
         run: |
           cmake -S . -B "$BUILD_DIR" \
-            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -DCMAKE_BUILD_TYPE=Debug \
             -DAUDIOCPP_VERSION=ci \
             -DENGINE_ENABLE_CUDA=OFF \
@@ -78,7 +65,3 @@ jobs:
         run: |
           cmake --build "$BUILD_DIR" --parallel "$(nproc)"
           ctest --test-dir "$BUILD_DIR" --output-on-failure --parallel 4
-
-      - name: ccache statistics
-        if: always()
-        run: ccache --show-stats --verbose

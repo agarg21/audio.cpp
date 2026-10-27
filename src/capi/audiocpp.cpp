@@ -1281,3 +1281,5 @@ audiocpp_status audiocpp_event_voice_activity(const audiocpp_event * event,
     if (out_probability != nullptr) *out_probability = activity.probability;
     return AUDIOCPP_OK;
 }
+
+// measurement: small source change
